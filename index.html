@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Two Towers – NexusPlay</title>
+    <title>Flappy Bird – NexusPlay</title>
     <style>
         * {
             margin: 0;
@@ -30,9 +30,10 @@
         canvas {
             border-radius: 28px;
             box-shadow: 0 25px 40px rgba(0,0,0,0.4);
-            border: 2px solid rgba(255,170,68,0.5);
+            border: 2px solid #ffaa44;
             display: block;
-            background: #1a2a3a;
+            background: linear-gradient(180deg, #87CEEB, #E0F6FF);
+            cursor: pointer;
         }
 
         .ui-panel {
@@ -46,35 +47,34 @@
             z-index: 10;
         }
 
-        .stats {
+        .score-display {
             background: rgba(0,0,0,0.6);
             backdrop-filter: blur(8px);
             padding: 6px 16px;
             border-radius: 40px;
             color: white;
             font-weight: bold;
-            display: flex;
-            gap: 20px;
+            font-size: 16px;
         }
 
-        .store-btn {
-            background: #ffaa44;
-            border: none;
+        .best-display {
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
             padding: 6px 16px;
             border-radius: 40px;
-            color: #1a1a2e;
+            color: #ffaa44;
             font-weight: bold;
-            cursor: pointer;
+            font-size: 14px;
         }
 
+        /* NexusPlay Main Menu */
         .main-menu {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(145deg, rgba(10,15,30,0.95), rgba(5,10,20,0.98));
-            backdrop-filter: blur(12px);
+            background: linear-gradient(145deg, #1a2a3a, #0f1a2a);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -84,150 +84,69 @@
         }
 
         .game-title {
-            font-size: 36px;
+            font-size: 38px;
             font-weight: bold;
             color: #ffaa44;
             text-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            margin-bottom: 30px;
-            letter-spacing: 2px;
+            margin-bottom: 40px;
+            letter-spacing: 3px;
         }
 
-        .menu-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            width: 80%;
-            max-width: 250px;
+        .play-btn {
+            background: #ffaa44;
+            border: none;
+            padding: 15px 50px;
+            border-radius: 60px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #1a1a2e;
+            cursor: pointer;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            transition: 0.1s;
         }
 
-        .menu-btn {
-            background: rgba(0,0,0,0.6);
+        .play-btn:active {
+            transform: scale(0.96);
+        }
+
+        .tournament-btn {
+            background: rgba(255,255,255,0.15);
             border: 2px solid #ffaa44;
-            padding: 12px;
+            padding: 10px 40px;
             border-radius: 50px;
-            color: #ffaa44;
             font-size: 18px;
             font-weight: bold;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .menu-btn:hover {
-            background: #ffaa44;
-            color: #1a1a2e;
-            transform: scale(1.02);
-        }
-
-        /* Store Panel */
-        .store-panel {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(145deg, rgba(10,15,30,0.98), rgba(5,10,20,0.99));
-            backdrop-filter: blur(12px);
-            display: none;
-            flex-direction: column;
-            z-index: 40;
-            border-radius: 25px;
-            padding: 20px;
-            overflow-y: auto;
-        }
-
-        .store-panel.show {
-            display: flex;
-        }
-
-        .store-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .store-title {
             color: #ffaa44;
-            font-size: 20px;
-            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 30px;
+            transition: 0.1s;
         }
 
-        .store-close {
+        .tournament-btn:active {
+            transform: scale(0.96);
+        }
+
+        .bottom-menu {
+            display: flex;
+            gap: 25px;
+            margin-top: 10px;
+        }
+
+        .bottom-btn {
             background: none;
             border: none;
             color: #ffaa44;
-            font-size: 24px;
-            cursor: pointer;
-        }
-
-        .category-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .cat-btn {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid #ffaa44;
-            padding: 6px 15px;
-            border-radius: 30px;
-            color: #ffaa44;
-            cursor: pointer;
-        }
-
-        .cat-btn.active {
-            background: #ffaa44;
-            color: #1a1a2e;
-        }
-
-        .skins-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .skin-item {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,170,68,0.3);
-            border-radius: 20px;
-            padding: 12px 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .skin-item.selected {
-            background: #ffaa44;
-            border-color: white;
-        }
-
-        .skin-item.selected .skin-name {
-            color: #1a1a2e;
-        }
-
-        .skin-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .skin-icon {
-            font-size: 32px;
-        }
-
-        .skin-name {
-            color: #ffaa44;
+            font-size: 16px;
             font-weight: bold;
+            cursor: pointer;
+            padding: 5px 0;
+            transition: 0.1s;
         }
 
-        .skin-price {
-            color: #ffaa44;
-        }
-
-        .skin-owned {
-            color: #4CAF50;
+        .bottom-btn:active {
+            transform: scale(0.95);
+            color: white;
         }
 
         .game-over-screen {
@@ -252,7 +171,7 @@
 
         .game-over-title {
             color: #ffaa44;
-            font-size: 28px;
+            font-size: 32px;
             font-weight: bold;
             margin-bottom: 20px;
         }
@@ -260,14 +179,14 @@
         .final-score {
             color: white;
             font-size: 24px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         .restart-btn {
             background: #ffaa44;
             border: none;
-            padding: 10px 30px;
-            border-radius: 30px;
+            padding: 12px 35px;
+            border-radius: 40px;
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
@@ -283,33 +202,25 @@
 <div class="game-container">
     <canvas id="gameCanvas" width="400" height="600"></canvas>
     <div class="ui-panel">
-        <div class="stats">
-            <span>❤️ <span id="lives">3</span></span>
-            <span>💰 <span id="coins">0</span></span>
-            <span>🏆 <span id="score">0</span></span>
-        </div>
-        <button class="store-btn" id="storeBtn">🛒 SHOP</button>
+        <div class="score-display">SCORE: <span id="score">0</span></div>
+        <div class="best-display">🏆 BEST: <span id="bestScore">0</span></div>
     </div>
 
+    <!-- NexusPlay Main Menu -->
     <div id="mainMenu" class="main-menu">
-        <div class="game-title">⚔️ TWO TOWERS ⚔️</div>
-        <div class="menu-buttons">
-            <div class="menu-btn" id="playBtn">PLAY</div>
+        <div class="game-title">FLAPPY BIRD</div>
+        <button class="play-btn" id="playBtn">PLAY</button>
+        <button class="tournament-btn" id="tournamentBtn">TOURNAMENTS</button>
+        <div class="bottom-menu">
+            <button class="bottom-btn" id="storeMenuBtn">STORE</button>
+            <button class="bottom-btn" id="scoresMenuBtn">SCORES</button>
+            <button class="bottom-btn" id="optionsMenuBtn">OPTIONS</button>
         </div>
-    </div>
-
-    <div id="storePanel" class="store-panel">
-        <div class="store-header">
-            <div class="store-title">🛒 CHARACTER SHOP</div>
-            <button class="store-close" id="closeStoreBtn">✖</button>
-        </div>
-        <div class="category-buttons" id="categoryButtons"></div>
-        <div class="skins-grid" id="skinsGrid"></div>
     </div>
 
     <div id="gameOverScreen" class="game-over-screen">
         <div class="game-over-title">GAME OVER</div>
-        <div class="final-score">Score: <span id="finalScore">0</span></div>
+        <div class="final-score">SCORE: <span id="finalScore">0</span></div>
         <button class="restart-btn" id="restartBtn">PLAY AGAIN</button>
     </div>
 </div>
@@ -318,443 +229,339 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
-    // Game variables
-    let lives = 3;
-    let coins = localStorage.getItem('twoTowersCoins') ? parseInt(localStorage.getItem('twoTowersCoins')) : 0;
+    // ==================== AUDIO SYSTEM ====================
+    let audioCtx = null;
+    
+    function playSound(frequency, duration, volume = 0.12) {
+        try {
+            if(!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.value = frequency;
+            gain.gain.value = volume;
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+            setTimeout(() => {
+                try { osc.stop(); } catch(e) {}
+            }, duration * 1000);
+        } catch(e) {}
+    }
+    
+    // ==================== GAME VARIABLES ====================
+    let bird = {
+        x: 80,
+        y: canvas.height/2,
+        radius: 14,
+        velocity: 0,
+        gravity: 0.25,
+        jumpPower: -5.5
+    };
+    
+    let pipes = [];
     let score = 0;
-    let enemies = [];
+    let bestScore = localStorage.getItem('flappyBest') ? parseInt(localStorage.getItem('flappyBest')) : 0;
     let gameRunning = true;
     let gameActive = false;
     let frame = 0;
-    let spawnRate = 60;
-    let currentSkin = localStorage.getItem('twoTowersSkin') || 'ninja_shadow';
-    let ownedSkins = JSON.parse(localStorage.getItem('twoTowersOwnedSkins')) || ['ninja_shadow'];
-    let currentCategory = 'ninja';
+    let pipeGap = 150;
+    let pipeWidth = 60;
+    let pipeSpeed = 2;
+    let backgroundOffset = 0;
+    let wingAngle = 0;
     
-    // Tower positions
-    let leftTower = { x: 80, y: 500, width: 50, height: 80 };
-    let rightTower = { x: 270, y: 500, width: 50, height: 80 };
-    
-    // Enemy types
-    const enemyTypes = {
-        goblin: { health: 1, damage: 1, speed: 1.5, reward: 10, size: 25, color: '#6B8E23' },
-        orc: { health: 2, damage: 1, speed: 1.2, reward: 20, size: 30, color: '#556B2F' },
-        troll: { health: 3, damage: 2, speed: 0.8, reward: 30, size: 35, color: '#8B4513' }
-    };
-    
-    // ==================== SKINS WITH COMPLETE COSTUMES ====================
-    const categories = {
-        ninja: { name: 'NINJA', icon: '🥷' },
-        pirate: { name: 'PIRATE', icon: '🏴‍☠️' },
-        knight: { name: 'KNIGHT', icon: '🛡️' }
-    };
-    
-    const skins = [
-        // NINJA - Complete ninja with sword
-        { id: 'ninja_shadow', name: 'Shadow Ninja', category: 'ninja', price: 0, unlocked: true,
-          weapon: '🗡️', weaponName: 'Katana', attackAnim: '⚔️', color: '#1a1a1a', eyeColor: '#FF0000',
-          hat: '🥷', accessory: '🔪', desc: 'Swift katana strikes' },
-        { id: 'ninja_fire', name: 'Fire Ninja', category: 'ninja', price: 800, unlocked: false,
-          weapon: '🔥', weaponName: 'Fire Blade', attackAnim: '🔥', color: '#FF4500', eyeColor: '#FFFF00',
-          hat: '👺', accessory: '🔪', desc: 'Burning blade attacks' },
-        { id: 'ninja_storm', name: 'Storm Ninja', category: 'ninja', price: 1200, unlocked: false,
-          weapon: '⚡', weaponName: 'Lightning Blade', attackAnim: '⚡', color: '#00BFFF', eyeColor: '#FFFFFF',
-          hat: '🌩️', accessory: '🔪', desc: 'Lightning fast strikes' },
-        
-        // PIRATE - Complete pirate with hook and eye patch
-        { id: 'pirate_deckhand', name: 'Deckhand', category: 'pirate', price: 0, unlocked: true,
-          weapon: '🔪', weaponName: 'Cutlass', attackAnim: '⚔️', color: '#8B4513', eyeColor: '#000000',
-          hat: '🏴‍☠️', accessory: '🦜', desc: 'Sharp cutlass strikes' },
-        { id: 'pirate_captain', name: 'Captain', category: 'pirate', price: 1000, unlocked: false,
-          weapon: '⚓', weaponName: 'Anchor', attackAnim: '💥', color: '#2F4F4F', eyeColor: '#FFD700',
-          hat: '🧢', accessory: '🦜', desc: 'Heavy anchor swings' },
-        { id: 'pirate_kraken', name: 'Kraken Lord', category: 'pirate', price: 1500, unlocked: false,
-          weapon: '🐙', weaponName: 'Tentacle', attackAnim: '🌊', color: '#006400', eyeColor: '#FF4500',
-          hat: '👑', accessory: '🐙', desc: 'Tentacle slams' },
-        
-        // KNIGHT - Complete knight with sword and shield
-        { id: 'knight_squire', name: 'Squire', category: 'knight', price: 0, unlocked: true,
-          weapon: '⚔️', weaponName: 'Longsword', attackAnim: '⚔️', color: '#C0C0C0', eyeColor: '#000000',
-          hat: '🛡️', accessory: '🛡️', desc: 'Balanced sword strikes' },
-        { id: 'knight_paladin', name: 'Paladin', category: 'knight', price: 1200, unlocked: false,
-          weapon: '🔨', weaponName: 'Hammer', attackAnim: '💥', color: '#DAA520', eyeColor: '#FFD700',
-          hat: '⛑️', accessory: '🛡️', desc: 'Holy hammer smashes' },
-        { id: 'knight_dark', name: 'Dark Knight', category: 'knight', price: 1800, unlocked: false,
-          weapon: '🗡️', weaponName: 'Shadow Blade', attackAnim: '🌑', color: '#2F2F2F', eyeColor: '#FF0000',
-          hat: '👑', accessory: '🛡️', desc: 'Darkness strikes' }
-    ];
-    
-    function getSkin() { return skins.find(s => s.id === currentSkin); }
+    document.getElementById('bestScore').innerText = bestScore;
     
     function updateUI() {
-        document.getElementById('lives').innerText = lives;
-        document.getElementById('coins').innerText = coins;
         document.getElementById('score').innerText = score;
-        localStorage.setItem('twoTowersCoins', coins);
-        localStorage.setItem('twoTowersSkin', currentSkin);
-        localStorage.setItem('twoTowersOwnedSkins', JSON.stringify(ownedSkins));
+        document.getElementById('bestScore').innerText = bestScore;
     }
     
-    function addEnemy() {
-        const types = ['goblin', 'orc', 'troll'];
-        const type = types[Math.floor(Math.random() * types.length)];
-        const side = Math.random() < 0.5 ? 'left' : 'right';
-        const enemy = {
-            type: type,
-            health: enemyTypes[type].health,
-            maxHealth: enemyTypes[type].health,
-            x: side === 'left' ? 30 : canvas.width - 55,
-            y: 480,
-            side: side,
-            size: enemyTypes[type].size,
-            speed: enemyTypes[type].speed,
-            reward: enemyTypes[type].reward
-        };
-        enemies.push(enemy);
-    }
-    
-    function attackEnemy(side) {
-        const skin = getSkin();
-        for(let i=0; i<enemies.length; i++) {
-            if(enemies[i].side === side) {
-                enemies[i].health--;
-                // Attack animation effect
-                showAttackEffect(side, skin.weapon);
-                if(enemies[i].health <= 0) {
-                    coins += enemies[i].reward;
-                    score += enemies[i].reward;
-                    enemies.splice(i,1);
-                    updateUI();
-                }
-                return true;
-            }
-        }
-        // No enemy on that side - damage tower
-        lives--;
-        updateUI();
-        if(lives <= 0) gameOver();
-        return false;
-    }
-    
-    function showAttackEffect(side, weaponIcon) {
-        // Visual effect will be drawn in next frame
-        window.lastAttack = { side: side, weapon: weaponIcon, time: Date.now() };
-    }
-    
-    function gameOver() {
-        gameRunning = false;
-        gameActive = false;
-        document.getElementById('finalScore').innerText = score;
-        document.getElementById('gameOverScreen').classList.add('show');
-    }
-    
-    function restartGame() {
-        lives = 3;
+    function initGame() {
+        bird.y = canvas.height/2;
+        bird.velocity = 0;
+        pipes = [];
         score = 0;
-        enemies = [];
         gameRunning = true;
-        gameActive = true;
         frame = 0;
         updateUI();
-        document.getElementById('gameOverScreen').classList.remove('show');
     }
     
-    // ==================== DRAWING ====================
-    function drawTowers() {
-        const skin = getSkin();
-        
-        // Left Tower
-        ctx.fillStyle = '#8B5A2B';
-        ctx.fillRect(leftTower.x, leftTower.y, leftTower.width, leftTower.height);
-        ctx.fillStyle = '#6B3E1A';
-        ctx.fillRect(leftTower.x + 5, leftTower.y - 10, 40, 10);
-        ctx.fillStyle = '#FF0000';
-        ctx.beginPath();
-        ctx.arc(leftTower.x + 25, leftTower.y - 5, 8, 0, Math.PI*2);
-        ctx.fill();
-        
-        // Right Tower
-        ctx.fillStyle = '#8B5A2B';
-        ctx.fillRect(rightTower.x, rightTower.y, rightTower.width, rightTower.height);
-        ctx.fillStyle = '#6B3E1A';
-        ctx.fillRect(rightTower.x + 5, rightTower.y - 10, 40, 10);
-        ctx.fillStyle = '#FF0000';
-        ctx.beginPath();
-        ctx.arc(rightTower.x + 25, rightTower.y - 5, 8, 0, Math.PI*2);
-        ctx.fill();
-        
-        // Character on left tower
-        ctx.font = '28px monospace';
-        ctx.fillStyle = 'white';
-        ctx.fillText(skin.hat, leftTower.x + 8, leftTower.y - 15);
-        ctx.fillStyle = skin.color;
-        ctx.beginPath();
-        ctx.arc(leftTower.x + 25, leftTower.y + 15, 12, 0, Math.PI*2);
-        ctx.fill();
-        ctx.fillStyle = skin.eyeColor;
-        ctx.beginPath();
-        ctx.arc(leftTower.x + 20, leftTower.y + 12, 2, 0, Math.PI*2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(leftTower.x + 30, leftTower.y + 12, 2, 0, Math.PI*2);
-        ctx.fill();
-        ctx.fillStyle = '#FF6600';
-        ctx.fillText(skin.weapon, leftTower.x + 35, leftTower.y + 18);
-        
-        // Character on right tower
-        ctx.fillText(skin.hat, rightTower.x + 8, rightTower.y - 15);
-        ctx.fillStyle = skin.color;
-        ctx.beginPath();
-        ctx.arc(rightTower.x + 25, rightTower.y + 15, 12, 0, Math.PI*2);
-        ctx.fill();
-        ctx.fillStyle = skin.eyeColor;
-        ctx.beginPath();
-        ctx.arc(rightTower.x + 20, rightTower.y + 12, 2, 0, Math.PI*2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(rightTower.x + 30, rightTower.y + 12, 2, 0, Math.PI*2);
-        ctx.fill();
-        ctx.fillStyle = '#FF6600';
-        ctx.fillText(skin.weapon, rightTower.x + 35, rightTower.y + 18);
-    }
-    
-    function drawEnemies() {
-        for(let enemy of enemies) {
-            // Enemy body
-            ctx.fillStyle = enemyTypes[enemy.type].color;
-            ctx.beginPath();
-            ctx.ellipse(enemy.x, enemy.y, enemy.size/2, enemy.size/1.5, 0, 0, Math.PI*2);
-            ctx.fill();
-            // Health bar
-            const healthPercent = enemy.health / enemy.maxHealth;
-            ctx.fillStyle = '#FF0000';
-            ctx.fillRect(enemy.x - 15, enemy.y - 20, 30, 5);
-            ctx.fillStyle = '#00FF00';
-            ctx.fillRect(enemy.x - 15, enemy.y - 20, 30 * healthPercent, 5);
-            // Eyes
-            ctx.fillStyle = '#FFFFFF';
-            ctx.beginPath();
-            ctx.arc(enemy.x - 5, enemy.y - 5, 3, 0, Math.PI*2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(enemy.x + 5, enemy.y - 5, 3, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = '#000000';
-            ctx.beginPath();
-            ctx.arc(enemy.x - 5, enemy.y - 6, 1.5, 0, Math.PI*2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(enemy.x + 5, enemy.y - 6, 1.5, 0, Math.PI*2);
-            ctx.fill();
-            // Angry eyebrows
-            ctx.beginPath();
-            ctx.moveTo(enemy.x - 10, enemy.y - 12);
-            ctx.lineTo(enemy.x - 2, enemy.y - 14);
-            ctx.lineTo(enemy.x - 2, enemy.y - 12);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.moveTo(enemy.x + 10, enemy.y - 12);
-            ctx.lineTo(enemy.x + 2, enemy.y - 14);
-            ctx.lineTo(enemy.x + 2, enemy.y - 12);
-            ctx.fill();
-        }
-    }
-    
-    function drawAttackEffect() {
-        if(window.lastAttack && Date.now() - window.lastAttack.time < 200) {
-            const skin = getSkin();
-            const x = window.lastAttack.side === 'left' ? leftTower.x + 40 : rightTower.x - 10;
-            const y = leftTower.y + 20;
-            ctx.font = '24px monospace';
-            ctx.fillStyle = '#FFD700';
-            ctx.fillText(window.lastAttack.weapon, x, y);
-            ctx.fillStyle = '#FF6600';
-            ctx.fillText(skin.attackAnim, x + 15, y - 10);
-        }
-    }
-    
-    function drawBackground() {
-        const grad = ctx.createLinearGradient(0,0,0,canvas.height);
-        grad.addColorStop(0, '#1a2a3a');
-        grad.addColorStop(1, '#0a1a2a');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0,0,canvas.width,canvas.height);
-        
-        // Ground
-        ctx.fillStyle = '#3a2a1a';
-        ctx.fillRect(0, canvas.height - 80, canvas.width, 80);
-        ctx.fillStyle = '#4a3a2a';
-        for(let i=0; i<10; i++) {
-            ctx.fillRect(i*40, canvas.height - 85, 20, 5);
-        }
-        
-        // Path lines
-        ctx.strokeStyle = '#ffaa44';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(canvas.width/2, canvas.height - 80);
-        ctx.lineTo(canvas.width/2, canvas.height - 50);
-        ctx.stroke();
-    }
-    
-    function draw() {
-        drawBackground();
-        drawTowers();
-        drawEnemies();
-        drawAttackEffect();
-        
-        // Instructions
-        if(gameActive && gameRunning) {
-            ctx.fillStyle = 'white';
-            ctx.font = '12px monospace';
-            ctx.fillText('Tap LEFT side to attack left enemies', 20, 40);
-            ctx.fillText('Tap RIGHT side to attack right enemies', 200, 40);
-        }
-        
-        if(!gameActive && !gameRunning) {
-            ctx.fillStyle = 'rgba(0,0,0,0.7)';
-            ctx.fillRect(0,0,canvas.width,canvas.height);
-            ctx.fillStyle = '#ffaa44';
-            ctx.font = 'bold 24px monospace';
-            ctx.fillText('GAME OVER', canvas.width/2-85, canvas.height/2-30);
-        }
+    function addPipe() {
+        const minHeight = 50;
+        const maxHeight = canvas.height - pipeGap - minHeight;
+        const topHeight = Math.floor(Math.random() * (maxHeight - minHeight + 1) + minHeight);
+        pipes.push({
+            x: canvas.width,
+            topHeight: topHeight,
+            bottomY: topHeight + pipeGap,
+            counted: false
+        });
     }
     
     function updateGame() {
         if(!gameActive || !gameRunning) return;
         
-        if(frame % spawnRate === 0) {
-            addEnemy();
-            if(spawnRate > 30) spawnRate--;
+        bird.velocity += bird.gravity;
+        bird.y += bird.velocity;
+        
+        if(bird.y - bird.radius <= 0 || bird.y + bird.radius >= canvas.height) {
+            gameOver();
+            return;
         }
         
-        for(let i=0; i<enemies.length; i++) {
-            const enemy = enemies[i];
-            if(enemy.side === 'left') {
-                enemy.x += enemy.speed;
-                if(enemy.x + enemy.size/2 >= leftTower.x) {
-                    lives--;
-                    enemies.splice(i,1);
+        backgroundOffset = (backgroundOffset + 0.3) % canvas.width;
+        
+        if(frame % 100 === 0) {
+            addPipe();
+        }
+        
+        for(let i=0; i<pipes.length; i++) {
+            pipes[i].x -= pipeSpeed;
+            
+            if(!pipes[i].counted && pipes[i].x + pipeWidth < bird.x) {
+                pipes[i].counted = true;
+                score++;
+                updateUI();
+                playSound(660, 0.1, 0.08);
+                if(score > bestScore) {
+                    bestScore = score;
+                    localStorage.setItem('flappyBest', bestScore);
                     updateUI();
-                    if(lives <= 0) gameOver();
-                    i--;
-                }
-            } else {
-                enemy.x -= enemy.speed;
-                if(enemy.x - enemy.size/2 <= rightTower.x + rightTower.width) {
-                    lives--;
-                    enemies.splice(i,1);
-                    updateUI();
-                    if(lives <= 0) gameOver();
-                    i--;
                 }
             }
+            
+            if(bird.x + bird.radius > pipes[i].x && bird.x - bird.radius < pipes[i].x + pipeWidth) {
+                if(bird.y - bird.radius < pipes[i].topHeight || bird.y + bird.radius > pipes[i].bottomY) {
+                    gameOver();
+                    return;
+                }
+            }
+            
+            if(pipes[i].x + pipeWidth < 0) {
+                pipes.splice(i,1);
+                i--;
+            }
         }
-        
         frame++;
     }
     
-    // ==================== SHOP FUNCTIONS ====================
-    function renderShop() {
-        const categoryButtons = document.getElementById('categoryButtons');
-        const skinsGrid = document.getElementById('skinsGrid');
+    function gameOver() {
+        gameRunning = false;
+        gameActive = false;
+        playSound(220, 0.3, 0.15);
+        document.getElementById('finalScore').innerText = score;
+        document.getElementById('gameOverScreen').classList.add('show');
+    }
+    
+    function restartGame() {
+        initGame();
+        document.getElementById('gameOverScreen').classList.remove('show');
+        gameActive = true;
+    }
+    
+    function jump() {
+        if(!gameActive) return;
+        if(!gameRunning) {
+            restartGame();
+            return;
+        }
+        bird.velocity = bird.jumpPower;
+        playSound(880, 0.12, 0.1);
+    }
+    
+    // ==================== DRAWING ====================
+    function drawBackground() {
+        const grad = ctx.createLinearGradient(0,0,0,canvas.height);
+        grad.addColorStop(0, '#87CEEB');
+        grad.addColorStop(1, '#E0F6FF');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0,0,canvas.width,canvas.height);
         
-        categoryButtons.innerHTML = '';
-        for(let [key, cat] of Object.entries(categories)) {
-            const btn = document.createElement('button');
-            btn.className = 'cat-btn' + (currentCategory === key ? ' active' : '');
-            btn.innerText = cat.name;
-            btn.onclick = () => {
-                currentCategory = key;
-                renderShop();
-            };
-            categoryButtons.appendChild(btn);
+        // Clouds exactly like screenshot
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.beginPath();
+        ctx.ellipse(70, 70 + backgroundOffset * 0.3, 45, 35, 0, 0, Math.PI*2);
+        ctx.ellipse(115, 60 + backgroundOffset * 0.3, 40, 30, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(300, 110 + backgroundOffset * 0.3, 50, 38, 0, 0, Math.PI*2);
+        ctx.ellipse(350, 100 + backgroundOffset * 0.3, 42, 32, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(200, 180 + backgroundOffset * 0.2, 35, 28, 0, 0, Math.PI*2);
+        ctx.fill();
+    }
+    
+    function drawPipes() {
+        for(let pipe of pipes) {
+            ctx.fillStyle = '#2E7D32';
+            ctx.fillRect(pipe.x, 0, pipeWidth, pipe.topHeight);
+            ctx.fillStyle = '#1B5E20';
+            ctx.fillRect(pipe.x - 5, pipe.topHeight - 30, pipeWidth + 10, 30);
+            ctx.fillStyle = '#4CAF50';
+            ctx.fillRect(pipe.x + 5, pipe.topHeight - 25, pipeWidth - 10, 20);
+            
+            ctx.fillStyle = '#2E7D32';
+            ctx.fillRect(pipe.x, pipe.bottomY, pipeWidth, canvas.height - pipe.bottomY);
+            ctx.fillStyle = '#1B5E20';
+            ctx.fillRect(pipe.x - 5, pipe.bottomY, pipeWidth + 10, 30);
+            ctx.fillStyle = '#4CAF50';
+            ctx.fillRect(pipe.x + 5, pipe.bottomY + 5, pipeWidth - 10, 20);
+        }
+    }
+    
+    function drawBird() {
+        wingAngle = (wingAngle + 0.2) % (Math.PI * 2);
+        const wingOffset = Math.sin(wingAngle) * 5;
+        
+        ctx.save();
+        ctx.translate(bird.x, bird.y);
+        ctx.rotate(Math.min(Math.max(bird.velocity * 0.08, -0.5), 0.7));
+        
+        // Bird body - exactly like screenshot
+        ctx.fillStyle = '#FFD966';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, bird.radius, bird.radius * 0.9, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.strokeStyle = '#E6A817';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        
+        // Eye
+        ctx.fillStyle = '#000';
+        ctx.beginPath();
+        ctx.arc(5, -3, 2.5, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(6, -4, 1, 0, Math.PI*2);
+        ctx.fill();
+        
+        // Wing
+        ctx.fillStyle = '#FFAA44';
+        ctx.beginPath();
+        ctx.moveTo(-5, 0);
+        ctx.lineTo(-15 + wingOffset, -5);
+        ctx.lineTo(-15 + wingOffset, 5);
+        ctx.fill();
+        
+        // Beak
+        ctx.fillStyle = '#FF6600';
+        ctx.beginPath();
+        ctx.moveTo(11, -2);
+        ctx.lineTo(19, 0);
+        ctx.lineTo(11, 2);
+        ctx.fill();
+        
+        // Little hair on top
+        ctx.fillStyle = '#E6A817';
+        ctx.beginPath();
+        ctx.moveTo(0, -14);
+        ctx.lineTo(-3, -20);
+        ctx.lineTo(3, -18);
+        ctx.fill();
+        
+        ctx.restore();
+    }
+    
+    function drawGround() {
+        ctx.fillStyle = '#6B4E3A';
+        ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+        ctx.fillStyle = '#8B5A2B';
+        for(let i=0; i<20; i++) {
+            ctx.fillRect(i*30 + (backgroundOffset % 30), canvas.height-55, 15, 8);
+        }
+        ctx.fillStyle = '#5D4037';
+        ctx.fillRect(0, canvas.height - 8, canvas.width, 8);
+    }
+    
+    function drawScoreOnCanvas() {
+        if(gameActive && gameRunning) {
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 42px monospace';
+            ctx.shadowBlur = 0;
+            ctx.fillText(score, canvas.width/2 - 15, 80);
+        }
+    }
+    
+    function draw() {
+        drawBackground();
+        drawPipes();
+        drawBird();
+        drawGround();
+        drawScoreOnCanvas();
+        
+        if(!gameActive) {
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = '#ffaa44';
+            ctx.font = 'bold 24px monospace';
+            ctx.fillText('FLAPPY BIRD', canvas.width/2-100, canvas.height/2-30);
+            ctx.fillStyle = 'white';
+            ctx.font = '14px monospace';
+            ctx.fillText('TAP TO START', canvas.width/2-55, canvas.height/2+20);
         }
         
-        const filtered = skins.filter(s => s.category === currentCategory);
-        skinsGrid.innerHTML = '';
-        for(let skin of filtered) {
-            const owned = ownedSkins.includes(skin.id);
-            const selected = currentSkin === skin.id;
-            const div = document.createElement('div');
-            div.className = 'skin-item' + (selected ? ' selected' : '');
-            div.innerHTML = `
-                <div class="skin-info">
-                    <div class="skin-icon">${skin.weapon}</div>
-                    <div>
-                        <div class="skin-name">${skin.name}</div>
-                        <div style="font-size:10px; color:#aaa;">${skin.desc}</div>
-                    </div>
-                </div>
-                <div>
-                    ${!owned ? `<div class="skin-price">${skin.price}💰</div>` : 
-                      `<div class="skin-owned">✓ OWNED</div>`}
-                </div>
-            `;
-            div.onclick = () => {
-                if(owned) {
-                    currentSkin = skin.id;
-                    localStorage.setItem('twoTowersSkin', currentSkin);
-                    renderShop();
-                } else {
-                    if(coins >= skin.price) {
-                        coins -= skin.price;
-                        ownedSkins.push(skin.id);
-                        updateUI();
-                        renderShop();
-                    } else {
-                        alert(`Need ${skin.price} coins!`);
-                    }
-                }
-            };
-            skinsGrid.appendChild(div);
+        if(!gameRunning && gameActive) {
+            ctx.fillStyle = 'rgba(0,0,0,0.7)';
+            ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = '#ffaa44';
+            ctx.font = 'bold 26px monospace';
+            ctx.fillText('GAME OVER', canvas.width/2-85, canvas.height/2-30);
+            ctx.fillStyle = 'white';
+            ctx.font = '16px monospace';
+            ctx.fillText(`SCORE: ${score}`, canvas.width/2-50, canvas.height/2+20);
         }
     }
     
     // ==================== EVENT LISTENERS ====================
-    canvas.addEventListener('click', (e) => {
-        if(!gameActive) return;
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const mouseX = (e.clientX - rect.left) * scaleX;
-        if(mouseX < canvas.width/2) {
-            attackEnemy('left');
-        } else {
-            attackEnemy('right');
+    canvas.addEventListener('click', () => {
+        if(!gameActive) {
+            document.getElementById('mainMenu').classList.add('hide');
+            gameActive = true;
+            initGame();
         }
+        jump();
     });
     
     canvas.addEventListener('touchstart', (e) => {
         e.preventDefault();
-        if(!gameActive) return;
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const touchX = (e.touches[0].clientX - rect.left) * scaleX;
-        if(touchX < canvas.width/2) {
-            attackEnemy('left');
-        } else {
-            attackEnemy('right');
+        if(!gameActive) {
+            document.getElementById('mainMenu').classList.add('hide');
+            gameActive = true;
+            initGame();
         }
+        jump();
     });
     
     document.getElementById('playBtn').onclick = () => {
         document.getElementById('mainMenu').classList.add('hide');
         gameActive = true;
-        gameRunning = true;
-        restartGame();
+        initGame();
+    };
+    
+    document.getElementById('tournamentBtn').onclick = () => {
+        alert('Tournaments coming soon!');
+    };
+    
+    document.getElementById('storeMenuBtn').onclick = () => {
+        alert('Store coming soon!');
+    };
+    
+    document.getElementById('scoresMenuBtn').onclick = () => {
+        alert(`Best Score: ${bestScore}`);
+    };
+    
+    document.getElementById('optionsMenuBtn').onclick = () => {
+        alert('Options coming soon!');
     };
     
     document.getElementById('restartBtn').onclick = () => {
         restartGame();
-    };
-    
-    document.getElementById('storeBtn').onclick = () => {
-        document.getElementById('storePanel').classList.add('show');
-        renderShop();
-    };
-    
-    document.getElementById('closeStoreBtn').onclick = () => {
-        document.getElementById('storePanel').classList.remove('show');
     };
     
     updateUI();
@@ -768,4 +575,4 @@
     gameLoop();
 </script>
 </body>
-</html>
+</html>                  
