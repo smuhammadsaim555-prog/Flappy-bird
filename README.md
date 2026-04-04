@@ -1,18 +1,27 @@
-⚔️ TWO TOWERS - DEFENSE GAME ⚔️
+# Flappy Bird - NexusPlay Edition
 
-Defend two towers from goblins, orcs, and trolls attacking from both sides. Tap left side of screen to attack enemies on the left, tap right side to attack enemies on the right.
+A classic Flappy Bird game with smooth gameplay, sound effects, and high score tracking. Tap to fly, avoid pipes, and beat your best score!
 
-Features:
-- 9 unique character skins (Ninja, Pirate, Knight)
-- Each skin has unique weapon and attack effects
-- Upgrade system with coins
-- Waves get harder as you survive longer
-- High score tracking
-- Shop to buy new skins
+## Features
+- Smooth 60fps gameplay
+- Sound effects (jump, score, game over)
+- Local high score storage
+- Responsive design for mobile
+- NexusPlay style main menu
 
-How to Play:
-- Tap LEFT side → Attack left tower enemies
-- Tap RIGHT side → Attack right tower enemies
-- Kill enemies to earn coins
-- Buy new skins from shop
-- Don't let enemies reach your towers!
+## How to Play
+- Tap anywhere on screen to make the bird jump
+- Avoid hitting the pipes or ground
+- Each pipe passed gives 1 point
+- Try to beat your high score!
+
+## Play Online
+[Click here to play](https://smuhammadsaim555-prog.github.io/flappy-bird-game/)
+
+## Technologies
+- HTML5 Canvas
+- CSS3
+- JavaScript
+- Web Audio API
+
+Made with ❤️ by NexusPlay Studios
