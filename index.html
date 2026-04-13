@@ -32,6 +32,7 @@
             box-shadow: 0 25px 40px rgba(0,0,0,0.4);
             border: 2px solid #ffaa44;
             display: block;
+            background: #87CEEB;
             cursor: pointer;
         }
 
@@ -97,10 +98,6 @@
             z-index: 20;
         }
 
-        .music-btn:active {
-            transform: scale(0.95);
-        }
-
         /* NexusPlay Home Page */
         .home-page {
             position: absolute;
@@ -122,7 +119,7 @@
             font-weight: bold;
             color: #ffaa44;
             text-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             letter-spacing: 3px;
         }
 
@@ -157,19 +154,16 @@
             font-weight: bold;
             text-align: center;
             cursor: pointer;
-            transition: 0.1s;
         }
 
         .menu-btn:active {
             transform: scale(0.96);
-            background: #ffaa44;
-            color: #1a1a2e;
         }
 
         .tap-text {
             color: white;
-            font-size: 14px;
-            margin-top: 20px;
+            font-size: 12px;
+            margin-top: 15px;
             opacity: 0.7;
         }
 
@@ -193,13 +187,13 @@
     <div id="homePage" class="home-page">
         <div class="game-title">SKYRIDER</div>
         <div class="home-bird">
-            <img id="homeBirdImg" src="assets/bird_normal.png" alt="Eagle">
+            <img id="homeBirdImg" src="bird_normal.png" alt="Eagle">
         </div>
         <div class="menu-buttons">
-            <div class="menu-btn" id="playMenuBtn">PLAY</div>
-            <div class="menu-btn" id="storeMenuBtn">STORE</div>
-            <div class="menu-btn" id="scoresMenuBtn">SCORES</div>
-            <div class="menu-btn" id="optionsMenuBtn">OPTIONS</div>
+            <div class="menu-btn" id="playMenuBtn">▶ PLAY</div>
+            <div class="menu-btn" id="storeMenuBtn">🛒 STORE</div>
+            <div class="menu-btn" id="scoresMenuBtn">🏆 SCORES</div>
+            <div class="menu-btn" id="optionsMenuBtn">⚙️ OPTIONS</div>
         </div>
         <div class="tap-text">👇 TAP PLAY TO START 👇</div>
     </div>
@@ -209,7 +203,7 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
-    // ==================== LOAD IMAGES ====================
+    // ==================== LOAD IMAGES (ROOT DIRECTORY) ====================
     const birdImages = {
         normal: new Image(),
         wingUp: new Image(),
@@ -225,18 +219,18 @@
         winter: new Image()
     };
     
-    birdImages.normal.src = 'assets/bird_normal.png';
-    birdImages.wingUp.src = 'assets/bird_wing_up.png';
-    birdImages.wingDown.src = 'assets/bird_wing_down.png';
-    birdImages.dead.src = 'assets/bird_dead.png';
+    birdImages.normal.src = 'bird_normal.png';
+    birdImages.wingUp.src = 'bird_wing_up.png';
+    birdImages.wingDown.src = 'bird_wing_down.png';
+    birdImages.dead.src = 'bird_dead.png';
     
-    bgImages.summer.src = 'assets/bg_summer.png';
-    bgImages.rainy.src = 'assets/bg_rainy.png';
-    bgImages.spring.src = 'assets/bg_spring.png';
-    bgImages.autumn.src = 'assets/bg_autumn.png';
-    bgImages.winter.src = 'assets/bg_winter.png';
+    bgImages.summer.src = 'bg_summer.png';
+    bgImages.rainy.src = 'bg_rainy.png';
+    bgImages.spring.src = 'bg_spring.png';
+    bgImages.autumn.src = 'bg_autumn.png';
+    bgImages.winter.src = 'bg_winter.png';
     
-    document.getElementById('homeBirdImg').src = 'assets/bird_normal.png';
+    document.getElementById('homeBirdImg').src = 'bird_normal.png';
     
     // ==================== SEASON EFFECTS PARTICLES ====================
     let particles = [];
@@ -544,7 +538,7 @@
         else if(currentSeason === 'autumn') bgImage = bgImages.autumn;
         else bgImage = bgImages.winter;
         
-        if(bgImage.complete && bgImage.src) {
+        if(bgImage.complete && bgImage.src && bgImage.naturalWidth > 0) {
             ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
         } else {
             const grad = ctx.createLinearGradient(0,0,0,canvas.height);
@@ -563,9 +557,6 @@
         ctx.beginPath();
         ctx.ellipse(300, 110 + bgOffset * 0.3, 50, 38, 0, 0, Math.PI*2);
         ctx.ellipse(350, 100 + bgOffset * 0.3, 42, 32, 0, 0, Math.PI*2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.ellipse(200, 180 + bgOffset * 0.2, 35, 28, 0, 0, Math.PI*2);
         ctx.fill();
     }
     
@@ -594,7 +585,7 @@
         else if(currentBirdFrame === 'dead') birdImg = birdImages.dead;
         else birdImg = birdImages.normal;
         
-        if(birdImg.complete && birdImg.src) {
+        if(birdImg.complete && birdImg.src && birdImg.naturalWidth > 0) {
             ctx.save();
             ctx.translate(bird.x, bird.y);
             ctx.rotate(Math.min(Math.max(bird.velocity * 0.08, -0.5), 0.5));
@@ -635,10 +626,6 @@
         drawGround();
         drawScoreOnCanvas();
         
-        if(!gameActive && !gameRunning) {
-            // Home page is shown, no extra drawing
-        }
-        
         if(!gameRunning && gameActive) {
             ctx.fillStyle = 'rgba(0,0,0,0.7)';
             ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -656,9 +643,9 @@
     canvas.addEventListener('touchstart', (e) => { e.preventDefault(); jump(); });
     
     document.getElementById('playMenuBtn').onclick = () => { startGame(); };
-    document.getElementById('storeMenuBtn').onclick = () => { alert('Store coming soon!'); };
+    document.getElementById('storeMenuBtn').onclick = () => { alert('🛒 Store coming soon!'); };
     document.getElementById('scoresMenuBtn').onclick = () => { alert(`🏆 BEST SCORE: ${bestScore}`); };
-    document.getElementById('optionsMenuBtn').onclick = () => { alert('Options coming soon!'); };
+    document.getElementById('optionsMenuBtn').onclick = () => { alert('⚙️ Options coming soon!'); };
     
     // Auto-start music on first touch
     document.addEventListener('touchstart', () => {
@@ -671,6 +658,8 @@
         }
     }, { once: true });
     
+    // Make sure home page is visible at start
+    document.getElementById('homePage').classList.remove('hide');
     initGame();
     initParticles('summer');
     
