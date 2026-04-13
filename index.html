@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Flappy Bird – NexusPlay</title>
+    <title>SkyRider – NexusPlay</title>
     <style>
         * {
             margin: 0;
@@ -80,7 +80,6 @@
             z-index: 10;
         }
 
-        /* NexusPlay Main Menu */
         .main-menu {
             position: absolute;
             top: 0;
@@ -120,6 +119,23 @@
         }
 
         .play-btn:active {
+            transform: scale(0.96);
+        }
+
+        .tournament-btn {
+            background: rgba(255,255,255,0.15);
+            border: 2px solid #ffaa44;
+            padding: 10px 40px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffaa44;
+            cursor: pointer;
+            margin-bottom: 30px;
+            transition: 0.1s;
+        }
+
+        .tournament-btn:active {
             transform: scale(0.96);
         }
 
@@ -201,13 +217,16 @@
         <div class="score-display">SCORE: <span id="score">0</span></div>
         <div class="best-display">🏆 BEST: <span id="bestScore">0</span></div>
     </div>
-    <div class="season-badge" id="seasonBadge">🌞 SUMMER</div>
+    <div class="season-badge" id="seasonBadge">☀️ SUMMER</div>
 
     <div id="mainMenu" class="main-menu">
-        <div class="game-title">FLAPPY BIRD</div>
+        <div class="game-title">SKYRIDER</div>
         <button class="play-btn" id="playBtn">PLAY</button>
+        <button class="tournament-btn" id="tournamentBtn">TOURNAMENTS</button>
         <div class="bottom-menu">
-            <button class="bottom-btn" id="scoresBtn">SCORES</button>
+            <button class="bottom-btn" id="storeMenuBtn">STORE</button>
+            <button class="bottom-btn" id="scoresMenuBtn">SCORES</button>
+            <button class="bottom-btn" id="optionsMenuBtn">OPTIONS</button>
         </div>
     </div>
 
@@ -222,13 +241,55 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
+    // ==================== LOAD CUSTOM IMAGES ====================
+    const birdImages = {
+        normal: new Image(),
+        wingUp: new Image(),
+        wingDown: new Image(),
+        dead: new Image()
+    };
+    
+    const bgImages = {
+        summer: new Image(),
+        rainy: new Image(),
+        spring: new Image(),
+        autumn: new Image(),
+        winter: new Image()
+    };
+    
+    birdImages.normal.src = 'assets/bird_normal.png';
+    birdImages.wingUp.src = 'assets/bird_wing_up.png';
+    birdImages.wingDown.src = 'assets/bird_wing_down.png';
+    birdImages.dead.src = 'assets/bird_dead.png';
+    
+    bgImages.summer.src = 'assets/bg_summer.png';
+    bgImages.rainy.src = 'assets/bg_rainy.png';
+    bgImages.spring.src = 'assets/bg_spring.png';
+    bgImages.autumn.src = 'assets/bg_autumn.png';
+    bgImages.winter.src = 'assets/bg_winter.png';
+    
+    let imagesLoaded = 0;
+    const totalImages = 9;
+    
+    function imageLoaded() {
+        imagesLoaded++;
+        if(imagesLoaded === totalImages) {
+            initGame();
+            gameLoop();
+        }
+    }
+    
+    for(let key in birdImages) {
+        birdImages[key].onload = imageLoaded;
+        birdImages[key].onerror = () => console.log('Image load error:', key);
+    }
+    for(let key in bgImages) {
+        bgImages[key].onload = imageLoaded;
+        bgImages[key].onerror = () => console.log('Image load error:', key);
+    }
+    
     // ==================== SEASONS ====================
     let currentSeason = 'summer';
-    let snowParticles = [];
-    let leafParticles = [];
-    let rainParticles = [];
-    let blossomParticles = [];
-    let sunRays = [];
     
     function getSeason(score) {
         if(score >= 60) return 'winter';
@@ -238,82 +299,22 @@
         return 'summer';
     }
     
+    function getSeasonName(season) {
+        const names = {
+            summer: '☀️ SUMMER',
+            rainy: '☔ RAINY',
+            spring: '🌸 SPRING',
+            autumn: '🍂 AUTUMN',
+            winter: '❄️ WINTER'
+        };
+        return names[season];
+    }
+    
     function updateSeason(score) {
         const newSeason = getSeason(score);
         if(newSeason !== currentSeason) {
             currentSeason = newSeason;
-            const badge = document.getElementById('seasonBadge');
-            if(currentSeason === 'summer') badge.innerHTML = '☀️ SUMMER';
-            else if(currentSeason === 'rainy') badge.innerHTML = '☔ RAINY SEASON';
-            else if(currentSeason === 'spring') badge.innerHTML = '🌸 SPRING TIME';
-            else if(currentSeason === 'autumn') badge.innerHTML = '🍂 AUTUMN';
-            else if(currentSeason === 'winter') badge.innerHTML = '❄️ WINTER';
-            
-            // Initialize particles for season
-            if(currentSeason === 'winter') {
-                snowParticles = [];
-                for(let i=0; i<80; i++) {
-                    snowParticles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, size: Math.random() * 4 + 2, speed: Math.random() * 2 + 1 });
-                }
-            } else if(currentSeason === 'autumn') {
-                leafParticles = [];
-                for(let i=0; i<50; i++) {
-                    leafParticles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, size: Math.random() * 6 + 4, speed: Math.random() * 1.5 + 0.5, sway: Math.random() * Math.PI * 2 });
-                }
-            } else if(currentSeason === 'spring') {
-                blossomParticles = [];
-                for(let i=0; i<60; i++) {
-                    blossomParticles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, size: Math.random() * 4 + 2, speed: Math.random() * 1 + 0.5 });
-                }
-            } else if(currentSeason === 'rainy') {
-                rainParticles = [];
-                for(let i=0; i<120; i++) {
-                    rainParticles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, length: Math.random() * 8 + 4, speed: Math.random() * 5 + 3 });
-                }
-            } else if(currentSeason === 'summer') {
-                sunRays = [];
-                for(let i=0; i<12; i++) {
-                    sunRays.push({ angle: (i * 30) * Math.PI / 180, length: 30 + Math.random() * 20 });
-                }
-            }
-        }
-        
-        // Update particles
-        if(currentSeason === 'winter') {
-            for(let p of snowParticles) {
-                p.y += p.speed;
-                if(p.y > canvas.height) {
-                    p.y = 0;
-                    p.x = Math.random() * canvas.width;
-                }
-            }
-        } else if(currentSeason === 'autumn') {
-            for(let p of leafParticles) {
-                p.y += p.speed;
-                p.x += Math.sin(p.sway) * 0.5;
-                p.sway += 0.05;
-                if(p.y > canvas.height) {
-                    p.y = 0;
-                    p.x = Math.random() * canvas.width;
-                }
-            }
-        } else if(currentSeason === 'spring') {
-            for(let p of blossomParticles) {
-                p.y += p.speed;
-                p.x += Math.sin(Date.now() * 0.002 + p.y) * 0.3;
-                if(p.y > canvas.height) {
-                    p.y = 0;
-                    p.x = Math.random() * canvas.width;
-                }
-            }
-        } else if(currentSeason === 'rainy') {
-            for(let p of rainParticles) {
-                p.y += p.speed;
-                if(p.y > canvas.height) {
-                    p.y = 0;
-                    p.x = Math.random() * canvas.width;
-                }
-            }
+            document.getElementById('seasonBadge').innerHTML = getSeasonName(currentSeason);
         }
     }
     
@@ -335,7 +336,17 @@
     }
     
     // ==================== GAME VARIABLES ====================
-    let bird = { x: 80, y: canvas.height/2, radius: 14, velocity: 0, gravity: 0.25, jumpPower: -5.5 };
+    let bird = {
+        x: 80,
+        y: canvas.height/2,
+        width: 34,
+        height: 34,
+        radius: 17,
+        velocity: 0,
+        gravity: 0.25,
+        jumpPower: -5.5
+    };
+    
     let pipes = [];
     let score = 0;
     let bestScore = localStorage.getItem('flappyBest') ? parseInt(localStorage.getItem('flappyBest')) : 0;
@@ -346,7 +357,7 @@
     let pipeWidth = 60;
     let pipeSpeed = 2;
     let bgOffset = 0;
-    let wingAngle = 0;
+    let currentBirdFrame = 'normal';
     
     document.getElementById('bestScore').innerText = bestScore;
     
@@ -363,6 +374,8 @@
         score = 0;
         gameRunning = true;
         frame = 0;
+        currentSeason = 'summer';
+        document.getElementById('seasonBadge').innerHTML = '☀️ SUMMER';
         updateUI();
     }
     
@@ -378,6 +391,10 @@
         
         bird.velocity += bird.gravity;
         bird.y += bird.velocity;
+        
+        if(bird.velocity < 0) currentBirdFrame = 'wingUp';
+        else if(bird.velocity > 2) currentBirdFrame = 'wingDown';
+        else currentBirdFrame = 'normal';
         
         if(bird.y - bird.radius <= 0 || bird.y + bird.radius >= canvas.height) { gameOver(); return; }
         
@@ -409,6 +426,7 @@
     function gameOver() {
         gameRunning = false;
         gameActive = false;
+        currentBirdFrame = 'dead';
         playSound(220, 0.3, 0.15);
         document.getElementById('finalScore').innerText = score;
         document.getElementById('gameOverScreen').classList.add('show');
@@ -418,6 +436,7 @@
         initGame();
         document.getElementById('gameOverScreen').classList.remove('show');
         gameActive = true;
+        currentBirdFrame = 'normal';
     }
     
     function jump() {
@@ -427,122 +446,23 @@
         playSound(880, 0.12, 0.1);
     }
     
-    // ==================== SEASONAL BACKGROUNDS ====================
+    // ==================== DRAWING ====================
     function drawBackground() {
-        // Sky gradient based on season
-        let grad;
-        if(currentSeason === 'summer') grad = ctx.createLinearGradient(0,0,0,canvas.height);
-        else if(currentSeason === 'rainy') grad = ctx.createLinearGradient(0,0,0,canvas.height);
-        else if(currentSeason === 'spring') grad = ctx.createLinearGradient(0,0,0,canvas.height);
-        else if(currentSeason === 'autumn') grad = ctx.createLinearGradient(0,0,0,canvas.height);
-        else grad = ctx.createLinearGradient(0,0,0,canvas.height);
+        let bgImage;
+        if(currentSeason === 'summer') bgImage = bgImages.summer;
+        else if(currentSeason === 'rainy') bgImage = bgImages.rainy;
+        else if(currentSeason === 'spring') bgImage = bgImages.spring;
+        else if(currentSeason === 'autumn') bgImage = bgImages.autumn;
+        else bgImage = bgImages.winter;
         
-        if(currentSeason === 'summer') {
-            grad.addColorStop(0, '#FFD700');
-            grad.addColorStop(0.3, '#87CEEB');
+        if(bgImage.complete && bgImage.src) {
+            ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+        } else {
+            const grad = ctx.createLinearGradient(0,0,0,canvas.height);
+            grad.addColorStop(0, '#87CEEB');
             grad.addColorStop(1, '#E0F6FF');
-        } else if(currentSeason === 'rainy') {
-            grad.addColorStop(0, '#4A5D6E');
-            grad.addColorStop(1, '#6B8E9B');
-        } else if(currentSeason === 'spring') {
-            grad.addColorStop(0, '#FFB6C1');
-            grad.addColorStop(0.5, '#FFC0CB');
-            grad.addColorStop(1, '#98FB98');
-        } else if(currentSeason === 'autumn') {
-            grad.addColorStop(0, '#FF8C69');
-            grad.addColorStop(0.5, '#FF7F50');
-            grad.addColorStop(1, '#DEB887');
-        } else if(currentSeason === 'winter') {
-            grad.addColorStop(0, '#708090');
-            grad.addColorStop(1, '#B0C4DE');
-        }
-        ctx.fillStyle = grad;
-        ctx.fillRect(0,0,canvas.width,canvas.height);
-        
-        // Sun for summer
-        if(currentSeason === 'summer') {
-            ctx.fillStyle = '#FFD700';
-            ctx.beginPath();
-            ctx.arc(320, 70, 35, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = 'rgba(255,215,0,0.3)';
-            for(let i=0; i<12; i++) {
-                let angle = (i * 30) * Math.PI / 180;
-                let x1 = 320 + Math.cos(angle) * 50;
-                let y1 = 70 + Math.sin(angle) * 50;
-                let x2 = 320 + Math.cos(angle) * 75;
-                let y2 = 70 + Math.sin(angle) * 75;
-                ctx.beginPath();
-                ctx.moveTo(x1, y1);
-                ctx.lineTo(x2, y2);
-                ctx.lineWidth = 4;
-                ctx.stroke();
-            }
-        }
-        
-        // Clouds
-        ctx.fillStyle = 'rgba(255,255,255,0.7)';
-        ctx.beginPath();
-        ctx.ellipse(70, 70 + bgOffset * 0.3, 45, 35, 0, 0, Math.PI*2);
-        ctx.ellipse(115, 60 + bgOffset * 0.3, 40, 30, 0, 0, Math.PI*2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.ellipse(300, 110 + bgOffset * 0.3, 50, 38, 0, 0, Math.PI*2);
-        ctx.ellipse(350, 100 + bgOffset * 0.3, 42, 32, 0, 0, Math.PI*2);
-        ctx.fill();
-        
-        // Dark clouds for rainy
-        if(currentSeason === 'rainy') {
-            ctx.fillStyle = 'rgba(80,90,100,0.6)';
-            ctx.beginPath();
-            ctx.ellipse(50, 80, 55, 40, 0, 0, Math.PI*2);
-            ctx.ellipse(100, 70, 50, 38, 0, 0, Math.PI*2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.ellipse(280, 100, 60, 42, 0, 0, Math.PI*2);
-            ctx.ellipse(340, 90, 52, 38, 0, 0, Math.PI*2);
-            ctx.fill();
-        }
-        
-        // Seasonal particles
-        if(currentSeason === 'rainy') {
-            for(let r of rainParticles) {
-                ctx.strokeStyle = 'rgba(150,180,200,0.6)';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(r.x, r.y);
-                ctx.lineTo(r.x - 3, r.y + r.length);
-                ctx.stroke();
-            }
-        } else if(currentSeason === 'spring') {
-            for(let b of blossomParticles) {
-                ctx.fillStyle = '#FFB7C5';
-                ctx.beginPath();
-                ctx.ellipse(b.x, b.y, b.size/2, b.size/2, 0, 0, Math.PI*2);
-                ctx.fill();
-                ctx.fillStyle = '#FF69B4';
-                ctx.beginPath();
-                ctx.ellipse(b.x - 1, b.y - 1, b.size/3, b.size/3, 0, 0, Math.PI*2);
-                ctx.fill();
-            }
-        } else if(currentSeason === 'autumn') {
-            for(let l of leafParticles) {
-                ctx.fillStyle = '#FF6347';
-                ctx.beginPath();
-                ctx.ellipse(l.x, l.y, l.size/2, l.size/3, 0, 0, Math.PI*2);
-                ctx.fill();
-                ctx.fillStyle = '#D2691E';
-                ctx.beginPath();
-                ctx.ellipse(l.x - 2, l.y, l.size/4, l.size/4, 0, 0, Math.PI*2);
-                ctx.fill();
-            }
-        } else if(currentSeason === 'winter') {
-            for(let s of snowParticles) {
-                ctx.fillStyle = 'white';
-                ctx.beginPath();
-                ctx.arc(s.x, s.y, s.size, 0, Math.PI*2);
-                ctx.fill();
-            }
+            ctx.fillStyle = grad;
+            ctx.fillRect(0,0,canvas.width,canvas.height);
         }
     }
     
@@ -565,74 +485,35 @@
     }
     
     function drawBird() {
-        wingAngle = (wingAngle + 0.2) % (Math.PI * 2);
-        const wingOffset = Math.sin(wingAngle) * 5;
+        let birdImg;
+        if(currentBirdFrame === 'wingUp') birdImg = birdImages.wingUp;
+        else if(currentBirdFrame === 'wingDown') birdImg = birdImages.wingDown;
+        else if(currentBirdFrame === 'dead') birdImg = birdImages.dead;
+        else birdImg = birdImages.normal;
         
-        ctx.save();
-        ctx.translate(bird.x, bird.y);
-        ctx.rotate(Math.min(Math.max(bird.velocity * 0.08, -0.5), 0.7));
-        
-        ctx.fillStyle = '#FFD966';
-        ctx.beginPath();
-        ctx.ellipse(0, 0, bird.radius, bird.radius * 0.9, 0, 0, Math.PI*2);
-        ctx.fill();
-        ctx.strokeStyle = '#E6A817';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-        
-        ctx.fillStyle = '#000';
-        ctx.beginPath();
-        ctx.arc(5, -3, 2.5, 0, Math.PI*2);
-        ctx.fill();
-        ctx.fillStyle = '#fff';
-        ctx.beginPath();
-        ctx.arc(6, -4, 1, 0, Math.PI*2);
-        ctx.fill();
-        
-        ctx.fillStyle = '#FFAA44';
-        ctx.beginPath();
-        ctx.moveTo(-5, 0);
-        ctx.lineTo(-15 + wingOffset, -5);
-        ctx.lineTo(-15 + wingOffset, 5);
-        ctx.fill();
-        
-        ctx.fillStyle = '#FF6600';
-        ctx.beginPath();
-        ctx.moveTo(11, -2);
-        ctx.lineTo(19, 0);
-        ctx.lineTo(11, 2);
-        ctx.fill();
-        
-        ctx.fillStyle = '#E6A817';
-        ctx.beginPath();
-        ctx.moveTo(0, -14);
-        ctx.lineTo(-3, -20);
-        ctx.lineTo(3, -18);
-        ctx.fill();
-        
-        ctx.restore();
+        if(birdImg.complete && birdImg.src) {
+            ctx.save();
+            ctx.translate(bird.x, bird.y);
+            ctx.rotate(Math.min(Math.max(bird.velocity * 0.08, -0.5), 0.5));
+            ctx.drawImage(birdImg, -bird.width/2, -bird.height/2, bird.width, bird.height);
+            ctx.restore();
+        } else {
+            ctx.fillStyle = '#FFD966';
+            ctx.beginPath();
+            ctx.ellipse(bird.x, bird.y, bird.radius, bird.radius*0.9, 0, 0, Math.PI*2);
+            ctx.fill();
+        }
     }
     
     function drawGround() {
-        if(currentSeason === 'winter') {
-            ctx.fillStyle = '#E8E8F0';
-            ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
-            ctx.fillStyle = '#D0D0E0';
-            for(let i=0; i<20; i++) {
-                ctx.fillRect(i*30 + (bgOffset % 30), canvas.height-55, 15, 8);
-            }
-            ctx.fillStyle = '#C0C0D0';
-            ctx.fillRect(0, canvas.height - 8, canvas.width, 8);
-        } else {
-            ctx.fillStyle = '#6B4E3A';
-            ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
-            ctx.fillStyle = '#8B5A2B';
-            for(let i=0; i<20; i++) {
-                ctx.fillRect(i*30 + (bgOffset % 30), canvas.height-55, 15, 8);
-            }
-            ctx.fillStyle = '#5D4037';
-            ctx.fillRect(0, canvas.height - 8, canvas.width, 8);
+        ctx.fillStyle = '#6B4E3A';
+        ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+        ctx.fillStyle = '#8B5A2B';
+        for(let i=0; i<20; i++) {
+            ctx.fillRect(i*30 + (bgOffset % 30), canvas.height-55, 15, 8);
         }
+        ctx.fillStyle = '#5D4037';
+        ctx.fillRect(0, canvas.height - 8, canvas.width, 8);
     }
     
     function drawScoreOnCanvas() {
@@ -655,7 +536,7 @@
             ctx.fillRect(0,0,canvas.width,canvas.height);
             ctx.fillStyle = '#ffaa44';
             ctx.font = 'bold 24px monospace';
-            ctx.fillText('FLAPPY BIRD', canvas.width/2-100, canvas.height/2-30);
+            ctx.fillText('SKYRIDER', canvas.width/2-85, canvas.height/2-30);
             ctx.fillStyle = 'white';
             ctx.font = '14px monospace';
             ctx.fillText('TAP TO START', canvas.width/2-55, canvas.height/2+20);
@@ -699,23 +580,31 @@
         initGame();
     };
     
-    document.getElementById('scoresBtn').onclick = () => {
+    document.getElementById('tournamentBtn').onclick = () => {
+        alert('Tournaments coming soon!');
+    };
+    
+    document.getElementById('storeMenuBtn').onclick = () => {
+        alert('Store coming soon!');
+    };
+    
+    document.getElementById('scoresMenuBtn').onclick = () => {
         alert(`🏆 BEST SCORE: ${bestScore}\n🎮 LATEST SCORE: ${score}`);
+    };
+    
+    document.getElementById('optionsMenuBtn').onclick = () => {
+        alert('Options coming soon!');
     };
     
     document.getElementById('restartBtn').onclick = () => {
         restartGame();
     };
     
-    updateUI();
-    
     function gameLoop() {
         updateGame();
         draw();
         requestAnimationFrame(gameLoop);
     }
-    
-    gameLoop();
 </script>
 </body>
 </html>
