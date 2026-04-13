@@ -1,10 +1,347 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Test</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>SkyRider – NexusPlay</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            font-family: 'Poppins', system-ui, sans-serif;
+        }
+        body {
+            background: linear-gradient(145deg, #0f172a, #0a0f1a);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .game-container {
+            position: relative;
+            display: inline-block;
+        }
+        canvas {
+            border-radius: 28px;
+            box-shadow: 0 25px 40px rgba(0,0,0,0.4);
+            border: 2px solid #ffaa44;
+            display: block;
+            background: #87CEEB;
+            cursor: pointer;
+        }
+        .ui-panel {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+        .score-display, .best-display {
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            padding: 6px 16px;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .best-display { color: #ffaa44; }
+        .music-btn {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            background: rgba(0,0,0,0.7);
+            border: 1px solid #ffaa44;
+            border-radius: 40px;
+            padding: 6px 16px;
+            color: #ffaa44;
+            font-size: 12px;
+            cursor: pointer;
+            z-index: 20;
+        }
+        .home-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, #1a2a3a, #0f1a2a);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 30;
+            border-radius: 25px;
+        }
+        .game-title {
+            font-size: 38px;
+            font-weight: bold;
+            color: #ffaa44;
+            margin-bottom: 20px;
+        }
+        .home-bird {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+        }
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 200px;
+            margin-top: 20px;
+        }
+        .menu-btn {
+            background: rgba(0,0,0,0.6);
+            border: 2px solid #ffaa44;
+            padding: 10px;
+            border-radius: 50px;
+            color: #ffaa44;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+        }
+        .menu-btn:active { transform: scale(0.96); }
+        .hide { display: none; }
+    </style>
 </head>
 <body>
-    <h1>Hello World</h1>
-    <p>Agar ye dikh raha hai to GitHub Pages sahi kaam kar raha hai.</p>
+<div class="game-container">
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
+    <div class="ui-panel">
+        <div class="score-display">SCORE: <span id="score">0</span></div>
+        <div class="best-display">🏆 BEST: <span id="bestScore">0</span></div>
+    </div>
+    <button class="music-btn" id="musicBtn">🔇 MUSIC OFF</button>
+    <div id="homePage" class="home-page">
+        <div class="game-title">SKYRIDER</div>
+        <div class="home-bird">🦅</div>
+        <div class="menu-buttons">
+            <div class="menu-btn" id="playMenuBtn">▶ PLAY</div>
+            <div class="menu-btn" id="storeMenuBtn">🛒 STORE</div>
+            <div class="menu-btn" id="scoresMenuBtn">🏆 SCORES</div>
+            <div class="menu-btn" id="optionsMenuBtn">⚙️ OPTIONS</div>
+        </div>
+    </div>
+</div>
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // ==================== MUSIC ====================
+    let audioCtx = null;
+    let musicActive = false;
+    function initMusic() {
+        if(audioCtx) return;
+        try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const masterGain = audioCtx.createGain();
+            masterGain.gain.value = 0.3;
+            masterGain.connect(audioCtx.destination);
+            const melody = [262, 294, 330, 349, 392, 440];
+            let noteIndex = 0;
+            function playNote() {
+                if(!musicActive || !audioCtx || audioCtx.state !== 'running') return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = melody[noteIndex % melody.length];
+                gain.gain.value = 0.1;
+                osc.connect(gain);
+                gain.connect(masterGain);
+                osc.start();
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.3);
+                noteIndex++;
+                setTimeout(() => { try { osc.stop(); } catch(e) {} }, 300);
+            }
+            setInterval(() => {
+                if(musicActive && audioCtx && audioCtx.state === 'running') playNote();
+            }, 600);
+        } catch(e) {}
+    }
+    function toggleMusic() {
+        const btn = document.getElementById('musicBtn');
+        if(!audioCtx) initMusic();
+        if(!musicActive) {
+            audioCtx.resume();
+            musicActive = true;
+            btn.innerHTML = '🔊 MUSIC ON';
+            btn.style.background = '#4CAF50';
+        } else {
+            audioCtx.suspend();
+            musicActive = false;
+            btn.innerHTML = '🔇 MUSIC OFF';
+            btn.style.background = 'rgba(0,0,0,0.7)';
+        }
+    }
+    document.getElementById('musicBtn').onclick = toggleMusic;
+    document.addEventListener('touchstart', () => { if(!audioCtx) initMusic(); if(!musicActive) toggleMusic(); }, { once: true });
+    
+    // ==================== GAME ====================
+    let bird = { x: 80, y: canvas.height/2, width: 34, height: 34, velocity: 0, gravity: 0.25, jumpPower: -5.5 };
+    let pipes = [];
+    let score = 0;
+    let bestScore = localStorage.getItem('best') ? parseInt(localStorage.getItem('best')) : 0;
+    let gameRunning = true;
+    let gameActive = false;
+    let frame = 0;
+    let pipeGap = 150;
+    let pipeWidth = 60;
+    let pipeSpeed = 2;
+    let bgOffset = 0;
+    let wingAngle = 0;
+    
+    document.getElementById('bestScore').innerText = bestScore;
+    
+    function updateUI() {
+        document.getElementById('score').innerText = score;
+        document.getElementById('bestScore').innerText = bestScore;
+    }
+    
+    function initGame() {
+        bird.y = canvas.height/2;
+        bird.velocity = 0;
+        pipes = [];
+        score = 0;
+        gameRunning = true;
+        frame = 0;
+        updateUI();
+    }
+    
+    function addPipe() {
+        let topH = Math.floor(Math.random() * (canvas.height - pipeGap - 80) + 50);
+        pipes.push({ x: canvas.width, topHeight: topH, bottomY: topH + pipeGap, counted: false });
+    }
+    
+    function updateGame() {
+        if(!gameActive || !gameRunning) return;
+        bird.velocity += bird.gravity;
+        bird.y += bird.velocity;
+        if(bird.y - 17 <= 0 || bird.y + 17 >= canvas.height) { gameOver(); return; }
+        bgOffset = (bgOffset + 0.3) % canvas.width;
+        if(frame % 100 === 0) addPipe();
+        for(let i=0; i<pipes.length; i++) {
+            pipes[i].x -= pipeSpeed;
+            if(!pipes[i].counted && pipes[i].x + pipeWidth < bird.x) {
+                pipes[i].counted = true;
+                score++;
+                updateUI();
+                if(score > bestScore) {
+                    bestScore = score;
+                    localStorage.setItem('best', bestScore);
+                    updateUI();
+                }
+            }
+            if(bird.x + 17 > pipes[i].x && bird.x - 17 < pipes[i].x + pipeWidth) {
+                if(bird.y - 17 < pipes[i].topHeight || bird.y + 17 > pipes[i].bottomY) { gameOver(); return; }
+            }
+            if(pipes[i].x + pipeWidth < 0) { pipes.splice(i,1); i--; }
+        }
+        frame++;
+    }
+    
+    function gameOver() {
+        gameRunning = false;
+        gameActive = false;
+        document.getElementById('homePage').classList.remove('hide');
+    }
+    
+    function startGame() {
+        document.getElementById('homePage').classList.add('hide');
+        gameActive = true;
+        gameRunning = true;
+        initGame();
+    }
+    
+    function jump() { if(!gameActive) return; if(!gameRunning) return; bird.velocity = bird.jumpPower; }
+    
+    // ==================== DRAWING ====================
+    function drawBackground() {
+        ctx.fillStyle = '#87CEEB';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = 'rgba(255,255,255,0.8)';
+        ctx.beginPath();
+        ctx.ellipse(70, 70 + bgOffset * 0.3, 45, 35, 0, 0, Math.PI*2);
+        ctx.ellipse(115, 60 + bgOffset * 0.3, 40, 30, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(300, 110 + bgOffset * 0.3, 50, 38, 0, 0, Math.PI*2);
+        ctx.ellipse(350, 100 + bgOffset * 0.3, 42, 32, 0, 0, Math.PI*2);
+        ctx.fill();
+    }
+    function drawPipes() {
+        for(let pipe of pipes) {
+            ctx.fillStyle = '#2E7D32';
+            ctx.fillRect(pipe.x, 0, pipeWidth, pipe.topHeight);
+            ctx.fillStyle = '#1B5E20';
+            ctx.fillRect(pipe.x - 5, pipe.topHeight - 30, pipeWidth + 10, 30);
+            ctx.fillStyle = '#2E7D32';
+            ctx.fillRect(pipe.x, pipe.bottomY, pipeWidth, canvas.height - pipe.bottomY);
+            ctx.fillStyle = '#1B5E20';
+            ctx.fillRect(pipe.x - 5, pipe.bottomY, pipeWidth + 10, 30);
+        }
+    }
+    function drawBird() {
+        wingAngle = (wingAngle + 0.2) % (Math.PI * 2);
+        let wingOffset = Math.sin(wingAngle) * 4;
+        ctx.save();
+        ctx.translate(bird.x, bird.y);
+        ctx.rotate(Math.min(Math.max(bird.velocity * 0.08, -0.5), 0.5));
+        ctx.fillStyle = '#FFD966';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 15, 12, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = '#000';
+        ctx.beginPath();
+        ctx.arc(5, -3, 2, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = '#FF6600';
+        ctx.beginPath();
+        ctx.moveTo(12, 0);
+        ctx.lineTo(20, 0);
+        ctx.lineTo(12, 4);
+        ctx.fill();
+        ctx.fillStyle = '#FFAA44';
+        ctx.beginPath();
+        ctx.moveTo(-8, 0);
+        ctx.lineTo(-12 + wingOffset, -5);
+        ctx.lineTo(-12 + wingOffset, 5);
+        ctx.fill();
+        ctx.restore();
+    }
+    function drawGround() {
+        ctx.fillStyle = '#6B4E3A';
+        ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+        ctx.fillStyle = '#8B5A2B';
+        for(let i=0; i<20; i++) {
+            ctx.fillRect(i*30 + (bgOffset % 30), canvas.height-55, 15, 8);
+        }
+    }
+    function drawScore() { if(gameActive && gameRunning) { ctx.fillStyle = 'white'; ctx.font = 'bold 36px monospace'; ctx.fillText(score, canvas.width/2 - 15, 70); } }
+    function draw() { drawBackground(); drawPipes(); drawBird(); drawGround(); drawScore(); }
+    
+    // ==================== EVENTS ====================
+    canvas.addEventListener('click', () => jump());
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); jump(); });
+    document.getElementById('playMenuBtn').onclick = () => startGame();
+    document.getElementById('storeMenuBtn').onclick = () => alert('Store coming soon!');
+    document.getElementById('scoresMenuBtn').onclick = () => alert(`Best Score: ${bestScore}`);
+    document.getElementById('optionsMenuBtn').onclick = () => alert('Options coming soon!');
+    
+    initGame();
+    function gameLoop() { updateGame(); draw(); requestAnimationFrame(gameLoop); }
+    gameLoop();
+</script>
 </body>
-</html>
+    </html>
