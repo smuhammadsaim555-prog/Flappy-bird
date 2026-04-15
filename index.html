@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -141,17 +141,16 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
-    // ==================== MUSIC (100% VOLUME, AUTO START) ====================
+    // ==================== MUSIC (GUARANTEED WORKING) ====================
     let audioCtx = null;
     let musicActive = true;
-    let musicInterval = null;
     
-    function initMusic() {
+    function initAndPlayMusic() {
         if(audioCtx) return;
         try {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const masterGain = audioCtx.createGain();
-            masterGain.gain.value = 1.0;  // 100% VOLUME
+            masterGain.gain.value = 0.8;
             masterGain.connect(audioCtx.destination);
             
             const melody = [262, 294, 330, 349, 392, 440, 494, 523];
@@ -163,7 +162,7 @@
                 const gain = audioCtx.createGain();
                 osc.type = 'square';
                 osc.frequency.value = melody[noteIndex % melody.length];
-                gain.gain.value = 0.25;  // LOUD
+                gain.gain.value = 0.15;
                 osc.connect(gain);
                 gain.connect(masterGain);
                 osc.start();
@@ -172,27 +171,21 @@
                 setTimeout(() => { try { osc.stop(); } catch(e) {} }, 250);
             }
             
-            if(musicInterval) clearInterval(musicInterval);
-            musicInterval = setInterval(() => {
-                if(musicActive && audioCtx && audioCtx.state === 'running') {
-                    playNote();
-                }
+            setInterval(() => {
+                if(musicActive && audioCtx && audioCtx.state === 'running') playNote();
             }, 500);
-        } catch(e) { console.log('Music error:', e); }
+            
+            audioCtx.resume();
+        } catch(e) {}
     }
     
-    function startMusic() {
-        if(!audioCtx) initMusic();
-        if(audioCtx && audioCtx.state === 'suspended') {
-            audioCtx.resume().then(() => {
-                console.log('Music playing at 100% volume');
-            }).catch(e => console.log(e));
-        }
-    }
+    // Auto start music
+    initAndPlayMusic();
+    document.addEventListener('click', () => { if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); });
+    document.addEventListener('touchstart', () => { if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); });
     
     function toggleMusic() {
         const btn = document.getElementById('musicBtn');
-        if(!audioCtx) initMusic();
         if(!audioCtx) return;
         if(musicActive) {
             audioCtx.suspend();
@@ -206,16 +199,7 @@
             btn.style.background = '#4CAF50';
         }
     }
-    
     document.getElementById('musicBtn').onclick = toggleMusic;
-    
-    // FORCE START MUSIC on page load
-    initMusic();
-    startMusic();
-    
-    // Also start on any user interaction (backup)
-    document.addEventListener('touchstart', startMusic);
-    document.addEventListener('click', startMusic);
     
     // ==================== GAME ====================
     let bird = { x: 80, y: canvas.height/2, width: 34, height: 34, velocity: 0, gravity: 0.25, jumpPower: -5.5 };
@@ -304,20 +288,6 @@
         if(!gameActive) return;
         if(!gameRunning) return;
         bird.velocity = bird.jumpPower;
-        // Jump sound
-        try {
-            if(audioCtx && musicActive) {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.frequency.value = 880;
-                gain.gain.value = 0.2;
-                osc.start();
-                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.2);
-                setTimeout(() => { try { osc.stop(); } catch(e) {} }, 200);
-            }
-        } catch(e) {}
     }
     
     // ==================== DRAWING ====================
@@ -453,4 +423,4 @@
     gameLoop();
 </script>
 </body>
-</html>
+</html>       
